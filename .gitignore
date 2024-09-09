@@ -1,0 +1,8 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/ProductStoreSystemAPI/.vs
+/ProductStoreSystemAPI/bin/Debug/net6.0
+
+/ProductStoreSystemAPI/obj
