@@ -7,6 +7,7 @@ import { UserSignalrDto } from '../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+
   isAuthentificated: boolean = false;
 
   private baseUrl: string = `${environment.baseURL}/Auth`;
@@ -15,27 +16,24 @@ export class AuthService {
     private signalrService: SignalrService,
     public router: Router
   ) {
-    this.authentificationProcess();
+    // this.authentificationProcess();
   }
 
   authentificationProcess() {
     const id = localStorage.getItem('token');
 
     if (id) {
-      console.log('#1 constructor Has token');
-
       if (this.signalrService.hubConnection.state === HubConnectionState.Connected) {
-        console.log('#2 constructor Connection exists');
-        this.reAuthorizeListener();
-        this.reAuthorize(id);
+        this.reAuthentificationListenerSuccess();
+        this.reAuthentification(id);
       }
 
       else {
         console.log('#2 constructor Wait connection to start');
         this.signalrService.signalrSubject$.subscribe(response => {
           if (response.type == "HubConnectionStarted") {
-            this.reAuthorizeListener();
-            this.reAuthorize(id);
+            this.reAuthentificationListenerSuccess();
+            this.reAuthentification(id);
           }
         });
       }
@@ -43,52 +41,36 @@ export class AuthService {
   }
 
   async authentification(email: string, password: string) {
-    console.log('#1 authMe First authorization');
     const userDto = { email: email, password: password };
 
     await this.signalrService.hubConnection.invoke('Authentification', userDto)
       .then(() => {
-        console.log('#3 authMe After Listener');
         alert("Loading is attempt...")
       })
       .catch(err => console.log(err));
   }
 
-  authorizeListenerSuccess() {
-    console.log('#4 authorizeListenerSuccess')
-
+  authentificationListenerSuccess() {
     this.signalrService.hubConnection.on('Authentification_ResponseSuccess', (user: UserSignalrDto) => {
-      const step = localStorage.getItem('token') ? 8 : 2;
-      console.log(`#${step} authorizeListenerSuccess => setLocalStorage`);
-
       this.signalrService.userData = { ...user };
       localStorage.setItem('token', user.id.toString());
 
       this.isAuthentificated = true;
-      alert('Login successfully!');
+      alert('Loggeed-in successfully!');
       this.router.navigate(["/edit-products"]);
     });
   }
 
-  authorizeListenerFail() {
-    console.log('#5 authorizeListenerFail');
-    this.signalrService.hubConnection.on("Authentification_Fail", () => alert("Wrong credentials!"));
-  }
-
-  async reAuthorize(userId: string) {
-    console.log('#7 reAuth');
+  async reAuthentification(userId: string) {
     await this.signalrService.hubConnection.invoke('ReAuthentification', userId)
       .then(() => {
-        console.log('#10 reAuth then()');
         alert("Loading is attempt...");
       })
       .catch(err => console.log(err));
   }
 
-  reAuthorizeListener() {
-    console.log('#6 reAuthListener');
+  reAuthentificationListenerSuccess() {
     this.signalrService.hubConnection.on('ReAuthentification_ResponseSuccess', (user: UserSignalrDto) => {
-      console.log('#9 reAuthListener => response');
 
       this.signalrService.userData = { ...user };
       this.isAuthentificated = true;
@@ -99,31 +81,33 @@ export class AuthService {
     });
   }
 
-  // login(email: string, password: string): Observable<any> {
-  //   return this.http.post(`${this.baseUrl}/login`, { email, password });
-  // }
+  async registration(email: string, password: string) {
+    const userDto = { email: email, password: password };
 
-  // register(email: string, password: string): Observable<any> {
-  //   return this.http.post(`${this.baseUrl}/register`, { email, password });
-  // }
+    await this.signalrService.hubConnection.invoke('Registration', userDto)
+      .then(() => {
+        alert("Loading is attempt...")
+      })
+      .catch(err => console.log(err));
+  }
 
-  // logout(): void {
-  //   localStorage.removeItem('token');
-  // }
+  registrationListenerSuccess() {
+    this.signalrService.hubConnection.on('Registration_ResponseSuccess', (user: UserSignalrDto) => {
+      this.signalrService.userData = { ...user };
+      localStorage.setItem('token', user.id.toString());
 
-  // getToken(): string | null {
-  //   return localStorage.getItem('token');
-  // }
+      this.isAuthentificated = true;
+      alert('Registrated successfully!');
+      this.router.navigate(["/edit-products"]);
+    });
+  }
 
-  // isAuthenticated(): boolean {
-  //   return !!this.getToken();
-  // }
+  authentificationListenerFail() {
+    this.signalrService.hubConnection.on("Authentification_Fail", () => alert("Wrong credentials!"));
+  }
 
-  // getUserRole(): string | null {
-  //   const token = this.getToken();
-  //   if (!token) return null;
+  registrationListenerFail() {
+    this.signalrService.hubConnection.on("Registration_Fail", () => alert("Such email already taken."));
+  }
 
-  //   const payload = JSON.parse(atob(token.split('.')[1]));
-  //   return payload['role']; // Assuming the JWT contains a 'role' claim
-  // }
 }

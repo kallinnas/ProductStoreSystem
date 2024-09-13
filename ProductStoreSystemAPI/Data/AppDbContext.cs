@@ -71,9 +71,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .HasColumnName("name");
-            entity.Property(e => e.Password)
+            entity.Property(e => e.PasswordHash)
                 .HasMaxLength(60)
-                .HasColumnName("password");
+                .HasColumnName("passwordHash");
             entity.Property(e => e.Role).HasColumnName("role");
 
             entity.HasMany(e => e.Connections)

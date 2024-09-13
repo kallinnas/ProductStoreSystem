@@ -4,9 +4,9 @@ public class User
 {
     public Guid Id { get; set; }
     public sbyte Role { get; set; }
-    public string Name { get; set; } = null!;
+    public string Name { get; set; } = "";
     public string Email { get; set; } = null!;
-    public string Password { get; set; } = null!;
+    public string PasswordHash { get; set; } = null!;
     public virtual ICollection<Connection> Connections { get; set; } = new List<Connection>();
 }
 

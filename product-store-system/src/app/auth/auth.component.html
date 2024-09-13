@@ -5,16 +5,24 @@
         <input ngModel name="email" type="email" placeholder="Email" matInput>
         <input ngModel name="password" type="password" placeholder="Password" matInput>
 
-        <button type="submit" [disabled]="!form.valid" mat-raised-button> {{ 'Login' }} </button>
+        <button *ngIf="isSignalrMode" mat-raised-button color="primary" [disabled]="!form.valid">
+            {{ isRegisterMode ? 'Register' : 'Login' }}
+        </button>
+    
     </form>
 
-    <!-- <button (click)="isRegisterMode ? register() : login()" mat-raised-button color="primary">
+    <button *ngIf="!isSignalrMode" (click)="isRegisterMode ? registerAPI(form) : loginAPI(form)" mat-raised-button
+        color="primary">
         {{ isRegisterMode ? 'Register' : 'Login' }}
-    </button> -->
+    </button>
 
-    <!-- <button (click)="toggleMode()" mat-button>
+    <button (click)="toggleMode()" mat-button>
         {{ isRegisterMode ? 'Already have an account? Login' : 'Need an account? Register' }}
-    </button> -->
+    </button>
 
-    <!-- <div *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</div> -->
+    <button (click)="toggleSignalr()" mat-button>
+        {{ isSignalrMode ? 'Hub authorization activated' : 'API authorization activated' }}
+    </button>
+
+    <div *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</div>
 </div>

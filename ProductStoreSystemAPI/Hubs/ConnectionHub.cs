@@ -26,14 +26,14 @@ public partial class ConnectionHub : Hub
 
     public async Task Authentification(UserAuthDto dto)
     {
-        var user = await context.Users.SingleOrDefaultAsync(p => p.Email == dto.Email && p.Password == dto.Password);
+        var user = await context.Users.SingleOrDefaultAsync(p => p.Email == dto.Email);
 
-        if (user == null)
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {
             await Clients.Caller.SendAsync("Authentification_Fail", Context.ConnectionId);
         }
 
-        else await Login(user);
+        else await Login(user, "Authentification_ResponseSuccess");
     }
 
     public async Task ReAuthentification(Guid userId)
@@ -45,29 +45,52 @@ public partial class ConnectionHub : Hub
             await Clients.Caller.SendAsync("Authentification_Fail", Context.ConnectionId);
         }
 
-        else await Login(person, true);
+        else await Login(person, "ReAuthentification_ResponseSuccess");
     }
 
-    private async Task Login(User user, bool isReAuth = false)
+    public async Task Registration(UserAuthDto dto)
+    {
+        try
+        {
+            if (context.Users.Any(u => u.Email == dto.Email))
+            {
+                await Clients.Caller.SendAsync("Registration_Fail", Context.ConnectionId);
+            }
+
+            var newUser = new User
+            {
+                Email = dto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                Role = (sbyte)(!context.Users.Any() ? 1 : 0) // first user becomes admin (Role = 1), others are customers (Role = 0)
+            };
+
+            context.Users.Add(newUser);
+            context.SaveChanges();
+
+            await Login(newUser, "Registration_ResponseSuccess");
+        }
+
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task Login(User user, string successMethod)
     {
         try
         {
             var signalrId = Context.ConnectionId;
 
-            var existingConnection = await context.Connections.SingleOrDefaultAsync(c => c.UserId == user.Id);
-
-            if (existingConnection == null)
-            {
-                var connection = new Connection(user.Id, signalrId);
-                await context.Connections.AddAsync(connection);
-                await context.SaveChangesAsync();
-            }
+            var connection = new Connection(user.Id, signalrId);
+            await context.Connections.AddAsync(connection);
+            await context.SaveChangesAsync();
 
             var userDto = new UserSignalrDto(user.Id, user.Name, signalrId);
-            var methodName = isReAuth ? "ReAuthentification_ResponseSuccess" : "Authentification_ResponseSuccess";
-            await Clients.Caller.SendAsync(methodName, userDto);
+            await Clients.Caller.SendAsync(successMethod, userDto);
             await Clients.Others.SendAsync("User_Online", userDto);
         }
+
         catch (Exception ex)
         {
             Console.WriteLine(ex);

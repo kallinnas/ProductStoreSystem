@@ -17,15 +17,14 @@ builder.Services.AddMySqlDatabase(builder.Configuration);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 
-// Swagger with JWT
-//builder.Services.AddSwaggerWithJwtAuth();
 
 // JWT configuration
-//builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
-
+// Swagger with JWT
+builder.Services.AddSwaggerWithJwtAuth();
 
 // JsonSerializerOptions to handle object cycles
 //builder.Services.AddControllers().AddJsonOptions(options =>
@@ -43,6 +42,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -50,14 +52,12 @@ app.UseAuthorization();
 
 app.UseCors("AllowAllHeaders");
 
-//app.UseHttpsRedirection();
-
 // SIGNAL_R
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapHub<ConnectionHub>("/ConnectionHub");
-    //endpoints.MapHub<ConnectionHub>("/connectionHub").RequireAuthorization();
+    //.RequireAuthorization();
 });
 
 app.Run();

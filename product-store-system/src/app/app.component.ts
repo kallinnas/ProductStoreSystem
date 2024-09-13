@@ -3,6 +3,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { GeneralModule } from './modules/general.module';
 import { AuthService } from './services/auth.service';
 import { SignalrService } from './services/signalr.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -12,17 +13,33 @@ import { SignalrService } from './services/signalr.service';
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'product-store-system';
+
+  subscriptions: Subscription[] = [];
+  isSignalr: boolean = false;
 
   constructor(
     private signalrService: SignalrService
   ) { }
 
   ngOnInit(): void {
-    this.signalrService.startConnection();
+    this.subscriptions.push(
+      this.signalrService.isSignalrModeSubject$.subscribe(isSignalr => {
+        this.isSignalr = isSignalr;
+
+        if (isSignalr) {
+          this.signalrService.startConnection();
+        }
+
+        else {
+          this.signalrService.stopConnection();
+        }
+      }));
   }
 
   ngOnDestroy(): void {
-    this.signalrService.offConnection("ngOnDestroy in app");
+    if (this.isSignalr) {
+      this.signalrService.offConnection("ngOnDestroy in app");
+    }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }
