@@ -3,7 +3,7 @@ using ProductStoreSystemAPI.Data;
 
 namespace ProductStoreSystemAPI.Extensions;
 
-public static class DatabaseServiceExtensions
+public static class MySqlDbExtensions
 {
     public static IServiceCollection AddMySqlDatabase(this IServiceCollection services, IConfiguration configuration)
     {

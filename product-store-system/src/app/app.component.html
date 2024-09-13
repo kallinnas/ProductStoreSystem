@@ -1,0 +1,21 @@
+<div fxFlexFill fxLayout="column">
+
+    <div fxFlex="80px" fxLayoutAlign="space-evenly center">
+        <a routerLink="/display-products" class="router-link">Display</a>
+        <a routerLink="/edit-products" class="router-link">Edit</a>
+        <a routerLink="/display-connection-status" class="router-link">User Status Connections</a>
+    </div>
+
+    <div fxFlex="100%" fxLayout="column" style="overflow: auto;">
+        <div fxFlex style="margin: 1%;">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+
+    <footer fxLayout="column">
+        <div fxLayout="row">
+            <hr fxFlex="90">
+        </div>
+        <p fxFlexAlign="center">Copyright © 2024 Product Store System API</p>
+    </footer>
+</div>

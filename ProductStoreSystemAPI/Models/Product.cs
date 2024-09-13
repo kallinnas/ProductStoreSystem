@@ -1,8 +1,10 @@
-﻿namespace ProductStoreSystemAPI.Model;
+﻿namespace ProductStoreSystemAPI.Models;
 
-public class Product
+public partial class Product
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
+    public long Id { get; set; }
+    public string Name { get; set; } = null!;
+    public string Desc { get; set; } = null!;
     public decimal Price { get; set; }
+    public string? Image { get; set; }
 }

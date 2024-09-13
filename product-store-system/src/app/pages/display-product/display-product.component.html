@@ -1,0 +1,9 @@
+<div>
+  <h2>All Products</h2>
+  <input [(ngModel)]="filter" placeholder="Filter by name" (input)="filterProducts()">
+  <ul>
+    <li *ngFor="let product of filteredProducts">
+      {{ product.name }} - {{ product.price }}
+    </li>
+  </ul>
+</div>

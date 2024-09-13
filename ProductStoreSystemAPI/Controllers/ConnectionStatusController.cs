@@ -1,24 +1,33 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using ProductStoreSystemAPI.Hubs;
+﻿//using Microsoft.AspNetCore.Authorization;
+//using Microsoft.AspNetCore.Mvc;
+//using Microsoft.AspNetCore.SignalR;
+//using ProductStoreSystemAPI.Hubs;
 
-namespace ProductStoreSystemAPI.Controllers;
+//namespace ProductStoreSystemAPI.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-[Authorize(Roles = "1")]
-public class ConnectionStatusController : ControllerBase
-{
-    private readonly IHubContext<CustomerConnectionHub> _hubContext;
+//[Route("api/[controller]")]
+//[ApiController]
+//[Authorize(Roles = "1")]
+//public class ConnectionStatusController : ControllerBase
+//{
+//    private readonly IHubContext<ConnectionHub> _hubContext;
 
-    public ConnectionStatusController(IHubContext<CustomerConnectionHub> hubContext) { _hubContext = hubContext; }
+//    public ConnectionStatusController(IHubContext<ConnectionHub> hubContext) { _hubContext = hubContext; }
 
-    [HttpGet("activeConnections")]
-    public IActionResult GetActiveConnections()
-    {
-        var activeConnections = CustomerConnectionHub.GetConnectedUsers();
-        return Ok(activeConnections);
-    }
-}
+//    [HttpGet]
+//    public async Task<IActionResult> GetConnectionStatus()
+//    {
+//        await _hubContext.Clients.All.SendAsync("ReceiveConnectionStatus");
+//        // Return a successful response (no need to assign the result)
+//        return Ok(new { message = "Connection status sent to all clients." });
+//    }
+
+//    //[HttpPost("addAdmin")]
+//    //public async Task<IActionResult> AddAdmin()
+//    //{
+//    //    //var connectionId = Context.ConnectionId; // Отримання ConnectionId користувача
+//    //    //await _hubContext.Groups.AddToGroupAsync(connectionId, "Admins");
+//    //    return Ok();
+//    //}
+//}
 

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProductStoreSystemAPI.Data;
-using ProductStoreSystemAPI.Model;
+using ProductStoreSystemAPI.Models;
 
 namespace ProductStoreSystemAPI.Controllers;
 
