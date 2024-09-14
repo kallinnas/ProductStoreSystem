@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { UserRegistrDto } from '../models/user.model';
 
@@ -10,7 +10,9 @@ import { UserRegistrDto } from '../models/user.model';
 export class ApiAuthService {
 
   private baseUrl: string = `${environment.baseURL}/Auth`;
-  isSignalrMode: boolean = false;
+
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+  isAuthenticatedSubject$ = this.isAuthenticatedSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -22,17 +24,31 @@ export class ApiAuthService {
     return this.http.post(`${this.baseUrl}/register`, user);
   }
 
-  // logout(): void {
-  //   localStorage.removeItem('token');
-  // }
+  private validateToken(token: string): void {
+    this.http.post<boolean>(`${this.baseUrl}/validateToken`, { token })
+      .pipe(
+        map((isValid) => {
+          this.isAuthenticatedSubject.next(isValid);
+        }),
+        catchError(() => {
+          this.isAuthenticatedSubject.next(false);
+          return of(false);
+        })
+      ).subscribe();
+  }
+
+  checkAuthentication(): void {
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.validateToken(token);
+    } else {
+      this.isAuthenticatedSubject.next(false);
+    }
+  }
 
   getToken(): string | null {
     return localStorage.getItem('token');
   }
-
-  // isAuthenticated(): boolean {
-  //   return !!this.getToken();
-  // }
 
   getUserRole(): string | null {
     const token = this.getToken();
@@ -45,12 +61,9 @@ export class ApiAuthService {
   getUserId(): string | null {
     const token = this.getToken();
     if (!token) return null;
-  
+
     const payload = JSON.parse(atob(token.split('.')[1]));
     return payload['nameid']; // 'nameid' corresponds to ClaimTypes.NameIdentifier
   }
 
-  validateToken(token: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/validateToken`, { token });
-  }
 }

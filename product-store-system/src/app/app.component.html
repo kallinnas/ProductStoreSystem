@@ -1,16 +1,28 @@
 <div fxFlexFill fxLayout="column">
 
-    <div fxFlex="80px" fxLayoutAlign="space-evenly center">
-        <a routerLink="/display-products" class="router-link">Display</a>
-        <a routerLink="/edit-products" class="router-link">Edit</a>
-        <a routerLink="/display-connection-status" class="router-link">User Status Connections</a>
+    <div *ngIf="isAuthorized" fxFlex="80px" fxLayoutAlign="space-around center">
+        <div *ngIf="apiAuthService.getUserRole() == '1'" fxFlex fxLayoutAlign="space-evenly center">
+            <a routerLink="/display-products" class="router-link">Display</a>
+            <a routerLink="/edit-products" class="router-link">Edit</a>
+            <a routerLink="/display-connection-status" class="router-link">User Status Connections</a>
+        </div>
+
+        <div fxFlex="100px" fxLayoutAlign="center">
+            <a style="cursor: pointer;" (click)="authService.logout()"> Logout </a>
+        </div>
     </div>
 
-    <div fxFlex="100%" fxLayout="column" style="overflow: auto;">
+    <div *ngIf="!isAuthPage; else authPageLayout" fxFlex="100%" fxLayout="column" style="overflow: auto;">
         <div fxFlex style="margin: 1%;">
             <router-outlet></router-outlet>
         </div>
     </div>
+
+    <ng-template #authPageLayout>
+        <div fxFlex="100%" fxLayout="column" fxLayoutAlign="center center" style="height: 100vh;">
+            <router-outlet></router-outlet>
+        </div>
+    </ng-template>
 
     <footer fxLayout="column">
         <div fxLayout="row">

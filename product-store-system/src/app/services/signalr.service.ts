@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { UserSignalrDto } from '../models/user.model';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 
 @Injectable({ providedIn: 'root' })
@@ -12,8 +12,6 @@ export class SignalrService {
 
   private signalrSubject = new Subject<any>();
   signalrSubject$ = this.signalrSubject.asObservable();
-  private isSignalrModeSubject = new BehaviorSubject<boolean>(false);
-  isSignalrModeSubject$ = this.isSignalrModeSubject.asObservable();
 
   startConnection = (loginToken: string): Promise<void> => {
     this.hubConnection = new signalR.HubConnectionBuilder()
@@ -50,11 +48,4 @@ export class SignalrService {
     (Array.isArray(text) ? text : [text]).forEach(t => this.hubConnection.off(t));
   }
 
-  switchSignalrMode(mode?: boolean) {
-    if (mode !== undefined) {
-      this.isSignalrModeSubject.next(mode);
-    } else {
-      this.isSignalrModeSubject.next(!this.isSignalrModeSubject.getValue());
-    }
-  }
 }

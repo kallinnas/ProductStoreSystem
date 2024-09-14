@@ -39,26 +39,49 @@ public class ProductsController : ControllerBase
 
     [HttpPost]
     [Authorize(Roles = "1")]
-    public async Task<ActionResult<Product>> PostProduct(Product product)
+    public async Task<ActionResult<Product>> PostProduct(ProductDto dto)
     {
-        _context.Products.Add(product);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
+        try
+        {
+            var product = new Product
+            {
+                Name = dto.Name,
+                Desc = dto.Desc,
+                Price = dto.Price
+            };
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, dto);
+        }
+
+        catch (Exception ex)
+        {
+            return BadRequest(ex.ToString());
+        }
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "1")]
-    public async Task<IActionResult> DeleteProduct(int id)
+    public async Task<IActionResult> DeleteProduct(long id)
     {
-        var product = await _context.Products.FindAsync(id);
-        if (product == null)
+        try
         {
-            return NotFound();
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
-        _context.Products.Remove(product);
-        await _context.SaveChangesAsync();
-        return NoContent();
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 }
 

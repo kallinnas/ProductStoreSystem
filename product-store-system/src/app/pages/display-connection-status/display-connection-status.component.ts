@@ -1,8 +1,9 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserSignalrDto } from '../../models/user.model';
 import { SignalrService } from '../../services/signalr.service';
 import { GeneralModule } from '../../modules/general.module';
 import { HubConnectionState } from '@microsoft/signalr';
+import { ApiAuthService } from '../../services/api-auth.service';
 
 @Component({
   selector: 'app-display-connection-status',
@@ -15,12 +16,14 @@ export class DisplayConnectionStatusComponent implements OnInit {
 
   usersOnline = new Array<UserSignalrDto>();
 
-  signalrService = inject(SignalrService);
+  constructor(
+    public signalrService: SignalrService,
+    public apiAuthService: ApiAuthService,
+  ) { }
 
   ngOnInit(): void {
     this.userOnline();
     this.userOffline();
-    this.logoutResponse();
     this.getOnlineUsers();
 
     if (this.signalrService.hubConnection.state == HubConnectionState.Connected) {
@@ -34,19 +37,6 @@ export class DisplayConnectionStatusComponent implements OnInit {
         }
       });
     }
-  }
-
-  logout(): void {
-    this.signalrService.hubConnection.invoke("LogoutUser", this.signalrService.userData.id)
-      .catch(err => console.error(err));
-  }
-
-  logoutResponse(): void {
-    this.signalrService.hubConnection.on('Logout_Response', () => {
-      localStorage.removeItem('token');
-      location.reload();
-      this.signalrService.hubConnection.stop();
-    });
   }
 
   userOnline(): void {

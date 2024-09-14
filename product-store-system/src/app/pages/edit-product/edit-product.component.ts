@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { GeneralModule } from '../../modules/general.module';
 import { ProductService } from '../../services/product.service';
+import { ProductDto } from '../../models/product.model';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-product',
@@ -10,12 +12,24 @@ import { ProductService } from '../../services/product.service';
   styleUrl: './edit-product.component.scss'
 })
 export class EditProductComponent {
+
+  productForm!: FormGroup;
   products: any[] = [];
   newProductName = '';
+  newProductDesc = '';
   newProductPrice = 0;
 
-  constructor(private productService: ProductService) {
+  constructor(private productService: ProductService, private fb: FormBuilder) {
     this.loadProducts();
+    this.initialForm();
+  }
+
+  initialForm() {
+    this.productForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      description: ['', [Validators.required, Validators.minLength(3)]],
+      price: [0, [Validators.required, Validators.min(0.01)]]
+    });
   }
 
   loadProducts() {
@@ -23,7 +37,7 @@ export class EditProductComponent {
   }
 
   addProduct() {
-    const newProduct = { name: this.newProductName, price: this.newProductPrice };
+    const newProduct = new ProductDto(this.productForm.value.name, this.productForm.value.description, this.productForm.value.price);
     this.productService.addProduct(newProduct).subscribe(() => this.loadProducts());
   }
 

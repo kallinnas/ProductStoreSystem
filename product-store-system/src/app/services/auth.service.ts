@@ -15,6 +15,20 @@ export class AuthService {
     public router: Router
   ) { }
 
+  logout(): void {
+    this.signalrService.hubConnection.invoke("LogoutUser", this.signalrService.userData.id)
+      .catch(err => console.error(err));
+  }
+
+  logoutResponse(): void {
+    this.signalrService.hubConnection.on('Logout_Response', () => {
+      localStorage.removeItem('token');
+      this.apiAuthService.checkAuthentication()
+      location.reload();
+      this.signalrService.hubConnection.stop();
+    });
+  }
+
   authentificationProcess() {
     if (this.signalrService.hubConnection) {
       if (this.signalrService.hubConnection.state === HubConnectionState.Connected) {
@@ -40,6 +54,7 @@ export class AuthService {
       this.authentificationListenerFail();
       this.registrationListenerSuccess();
       this.registrationListenerFail();
+      this.logoutResponse();
       this.signalrService.offConnection(['Authentification_ResponseSuccess', 'Authentification_Fail', 'Registration_Fail', "ngOnDestroy in app"]);
     }).catch(err => {
       console.error('Error starting SignalR connection:', err);
@@ -51,7 +66,7 @@ export class AuthService {
 
     await this.signalrService.hubConnection.invoke('Authentification', userDto)
       .then(() => {
-        alert("Loading is attempt...")
+        // alert("Loading is attempt...")
       })
       .catch(err => console.log(err));
   }
@@ -63,7 +78,7 @@ export class AuthService {
         this.signalrService.userData = { ...user };
         localStorage.setItem('token', user.id.toString());
 
-        alert('Logged-in successfully!');
+        // alert('Logged-in successfully!');
         this.router.navigate(["/edit-products"]);
       });
     } else {
@@ -76,7 +91,7 @@ export class AuthService {
       const userId = this.apiAuthService.getUserId();
       await this.signalrService.hubConnection.invoke('ReAuthentification', userId)
         .then(() => {
-          alert("Loading is attempt...");
+          // alert("Loading is attempt...");
         })
         .catch(err => console.log(err));
     }
@@ -92,7 +107,7 @@ export class AuthService {
         this.signalrService.hubConnection.on('ReAuthentification_ResponseSuccess', (user: UserSignalrDto) => {
 
           this.signalrService.userData = { ...user };
-          alert('Re-authentificated!');
+          // alert('Re-authentificated!');
 
           if (this.router.url == "/auth")
             this.router.navigate(["/edit-products"]);
@@ -123,7 +138,7 @@ export class AuthService {
         this.signalrService.userData = { ...user };
         localStorage.setItem('token', user.id.toString());
 
-        alert('Registrated successfully!');
+        // alert('Registrated successfully!');
         this.router.navigate(["/edit-products"]);
       });
     } else {

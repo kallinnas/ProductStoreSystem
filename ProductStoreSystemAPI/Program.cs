@@ -18,6 +18,8 @@ builder.Services.AddSignalR(options => options.EnableDetailedErrors = true);
 // MySQL Db
 builder.Services.AddMySqlDatabase(builder.Configuration);
 
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<JwtService>();
@@ -33,13 +35,6 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 
 // Swagger with JWT
 builder.Services.AddSwaggerWithJwtAuth();
-
-// JsonSerializerOptions to handle object cycles
-//builder.Services.AddControllers().AddJsonOptions(options =>
-//{
-//    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
-//    options.JsonSerializerOptions.MaxDepth = 128;
-//});
 
 
 

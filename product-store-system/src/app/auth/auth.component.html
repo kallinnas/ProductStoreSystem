@@ -1,29 +1,41 @@
 <div fxLayout="column" fxLayoutAlign="center center" style="width: 300px; margin: auto;">
     <h2>{{ isRegisterMode ? 'Register' : 'Login' }}</h2>
 
-    <form fxLayout="column" #form="ngForm" (ngSubmit)="onSubmit(form)">
-        <input ngModel name="email" type="email" placeholder="Email" matInput>
-        <input ngModel name="password" type="password" placeholder="Password" matInput>
-        <input *ngIf="isRegisterMode" ngModel name="name" type="name" placeholder="Name" matInput>
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()">
 
-        <button *ngIf="isSignalrMode" mat-raised-button color="primary" [disabled]="!form.valid">
-            {{ isRegisterMode ? 'Register' : 'Login' }}
-        </button>
-    
+        <div fxLayout="column">
+            <div fxLayout="column" fxLayoutAlign="center center">
+                <mat-form-field appearance="fill">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email" placeholder="Email">
+                    <mat-error *ngIf="authForm.controls['email'].hasError('required')">Email is required.</mat-error>
+                    <mat-error *ngIf="authForm.controls['email'].hasError('email')">Invalid email format.</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill">
+                    <mat-label>Password</mat-label>
+                    <input matInput formControlName="password" type="password" placeholder="Password">
+                    <mat-error *ngIf="authForm.controls['password'].hasError('required')">Password is
+                        required.</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="fill" *ngIf="isRegisterMode">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Name">
+                    <mat-error *ngIf="authForm.controls['name'].hasError('required')">Name is required.</mat-error>
+                </mat-form-field>
+            </div>
+
+
+            <button mat-button type="button" (click)="toggleMode()">
+                {{ isRegisterMode ? 'Already have an account? Login' : 'Need an account? Register' }}
+            </button>
+
+            <button mat-raised-button color="primary" type="submit" [disabled]="authForm.invalid">
+                {{ isRegisterMode ? 'Register' : 'Login' }}
+            </button>
+        </div>
+
+        <div *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</div>
     </form>
-
-    <button *ngIf="!isSignalrMode" (click)="isRegisterMode ? registerAPI(form) : loginAPI(form)" mat-raised-button
-        color="primary">
-        {{ isRegisterMode ? 'Register' : 'Login' }}
-    </button>
-
-    <button (click)="toggleMode()" mat-button>
-        {{ isRegisterMode ? 'Already have an account? Login' : 'Need an account? Register' }}
-    </button>
-
-    <!-- <button (click)="toggleSignalr()" mat-button>
-        {{ isSignalrMode ? 'Hub authorization activated' : 'API authorization activated' }}
-    </button> -->
-
-    <div *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</div>
 </div>

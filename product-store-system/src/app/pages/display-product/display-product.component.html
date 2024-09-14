@@ -1,9 +1,45 @@
-<div>
-  <h2>All Products</h2>
-  <input [(ngModel)]="filter" placeholder="Filter by name" (input)="filterProducts()">
-  <ul>
-    <li *ngFor="let product of filteredProducts">
-      {{ product.name }} - {{ product.price }}
-    </li>
-  </ul>
+<div fxLayout="column" fxLayoutAlign="start stretch" fxFlexFill>
+
+  <mat-card fxLayout="column" fxLayoutGap="10px" style="margin-bottom: 20px; max-width: 500px;"
+    fxLayoutAlign="center center">
+    <mat-card-header>
+      <mat-card-title>Filter Products</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content fxLayout="row" fxLayoutAlign="center center">
+      <mat-form-field appearance="fill" fxFlex="100%">
+        <mat-label>Filter by name</mat-label>
+        <input matInput [(ngModel)]="filter" (input)="filterProducts()" placeholder="Enter product name">
+      </mat-form-field>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card fxFlex fxLayout="column" fxLayoutGap="10px" style="width: 45vw; margin: 20px auto;">
+    <mat-card-header>
+      <mat-card-title>Product List</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="10px"
+      style="overflow: auto; height: 100%;">
+      <mat-list *ngIf="filteredProducts.length > 0">
+        <mat-list-item *ngFor="let product of filteredProducts" fxLayout="row" fxLayoutAlign="start center"
+          style="flex-wrap: nowrap;">
+          <div fxFlex="30%"  style="padding: 0 10px; box-sizing: border-box;">
+            <strong>{{ product.name }}</strong>
+          </div>
+          <div fxFlex="30%" style="padding: 0 10px; box-sizing: border-box;">
+            {{ product.desc }}
+          </div>
+          <div fxFlex="40%" style="padding: 0 10px; text-align: left; box-sizing: border-box;">
+            Price: {{ product.price | currency }}
+          </div>
+        </mat-list-item>
+      </mat-list>
+
+      <p *ngIf="filteredProducts.length === 0">No products match your filter.</p>
+    </mat-card-content>
+
+  </mat-card>
+
+
 </div>

@@ -1,35 +1,57 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
 import { GeneralModule } from './modules/general.module';
 import { AuthService } from './services/auth.service';
+import { filter, Subscription } from 'rxjs';
+import { ApiAuthService } from './services/api-auth.service';
 import { SignalrService } from './services/signalr.service';
-import { Subscription } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, GeneralModule, RouterLink],
+  imports: [RouterOutlet, GeneralModule, RouterLink, MatProgressSpinnerModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit, OnDestroy {
 
   subscriptions: Subscription[] = [];
-  isSignalr: boolean = false;
+  isAuthorized: boolean = false;
+  isAuthPage: boolean = false;
 
   constructor(
-    private signalrService: SignalrService
+    public authService: AuthService,
+    public apiAuthService: ApiAuthService,
+    public signalrService: SignalrService,
   ) { }
 
   ngOnInit(): void {
-    this.subscriptions.push(
-      this.signalrService.isSignalrModeSubject$.subscribe(isSignalr => { this.isSignalr = isSignalr; }));
+    if (typeof window !== 'undefined') {
+      this.apiAuthService.checkAuthentication();
+
+      this.subscriptions.push(
+        this.apiAuthService.isAuthenticatedSubject$.subscribe(valid => {
+          this.isAuthorized = valid;
+          if (valid) {
+            const token = localStorage.getItem('token');
+            // && this.signalrService.hubConnection.state === signalR.HubConnectionState.Connected
+            if (!this.signalrService.hubConnection) {
+              this.authService.launchHub(token!);
+            }
+          }
+        }));
+    }
+
+    this.authService.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        const authRoutes = ['/auth'];
+        this.isAuthPage = authRoutes.includes(event.urlAfterRedirects);
+      });
   }
 
   ngOnDestroy(): void {
-    if (this.isSignalr) {
-      this.signalrService.offConnection("ngOnDestroy in app");
-    }
     this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }

@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Product } from '../models/product.model';
+import { Product, ProductDto } from '../models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -11,19 +11,26 @@ export class ProductService {
 
   constructor(private http: HttpClient) { }
 
+  private getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+  }
+
   getProducts(): Observable<Product[]> {
-    return this.http.get<Product[]>(this.baseUrl);
+    return this.http.get<Product[]>(this.baseUrl, { headers: this.getAuthHeaders() });
   }
 
-  getProductById(id: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/${id}`);
+  getProductById(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.baseUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 
-  addProduct(product: any): Observable<any> {
-    return this.http.post(this.baseUrl, product);
+  addProduct(product: ProductDto): Observable<ProductDto> {
+    return this.http.post<ProductDto>(this.baseUrl, product, { headers: this.getAuthHeaders() });
   }
 
   deleteProduct(id: number): Observable<any> {
-    return this.http.delete(`${this.baseUrl}/${id}`);
+    return this.http.delete(`${this.baseUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
 }
