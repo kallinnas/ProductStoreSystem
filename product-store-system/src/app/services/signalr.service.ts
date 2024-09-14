@@ -15,11 +15,12 @@ export class SignalrService {
   private isSignalrModeSubject = new BehaviorSubject<boolean>(false);
   isSignalrModeSubject$ = this.isSignalrModeSubject.asObservable();
 
-  startConnection = (): Promise<void> => {
+  startConnection = (loginToken: string): Promise<void> => {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.hubURL, {
         skipNegotiation: true,
-        transport: signalR.HttpTransportType.WebSockets
+        transport: signalR.HttpTransportType.WebSockets,
+        accessTokenFactory: () => loginToken,
       })
       .build();
 
@@ -49,7 +50,11 @@ export class SignalrService {
     (Array.isArray(text) ? text : [text]).forEach(t => this.hubConnection.off(t));
   }
 
-  switchSignalrMode() {
-    this.isSignalrModeSubject.next(!this.isSignalrModeSubject.getValue());
+  switchSignalrMode(mode?: boolean) {
+    if (mode !== undefined) {
+      this.isSignalrModeSubject.next(mode);
+    } else {
+      this.isSignalrModeSubject.next(!this.isSignalrModeSubject.getValue());
+    }
   }
 }

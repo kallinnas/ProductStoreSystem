@@ -1,18 +1,26 @@
 using ProductStoreSystemAPI.Extensions;
 using ProductStoreSystemAPI.Hubs;
+using ProductStoreSystemAPI.Repositories.Interfaces;
+using ProductStoreSystemAPI.Repositories;
+using ProductStoreSystemAPI.Services.Interfaces;
+using ProductStoreSystemAPI.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 // CORS
 builder.Services.AddCors(options => options.AddPolicy("AllowAllHeaders", builder =>
-{ builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); }));
+{ builder.WithOrigins("http://localhost:4200").AllowCredentials().AllowAnyHeader().AllowAnyMethod(); }));
 
 // SIGNAL_R
 builder.Services.AddSignalR(options => options.EnableDetailedErrors = true);
 
 // MySQL Db
 builder.Services.AddMySqlDatabase(builder.Configuration);
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<JwtService>();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -32,6 +40,8 @@ builder.Services.AddSwaggerWithJwtAuth();
 //    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
 //    options.JsonSerializerOptions.MaxDepth = 128;
 //});
+
+
 
 var app = builder.Build();
 
@@ -56,8 +66,7 @@ app.UseCors("AllowAllHeaders");
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<ConnectionHub>("/ConnectionHub");
-    //.RequireAuthorization();
+    endpoints.MapHub<ConnectionHub>("/ConnectionHub").RequireAuthorization();
 });
 
 app.Run();

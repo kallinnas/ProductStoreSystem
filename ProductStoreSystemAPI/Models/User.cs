@@ -16,6 +16,11 @@ public class UserAuthDto
     public string Password { get; set; } = null!;
 }
 
+public class UserRegistrDto : UserAuthDto
+{
+    public string Name { get; set; } = null!;
+}
+
 public class UserSignalrDto
 {
     public Guid Id { get; set; }

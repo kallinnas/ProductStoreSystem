@@ -1,39 +1,49 @@
 import { Injectable } from '@angular/core';
-import { environment } from '../../environments/environment';
 import { SignalrService } from './signalr.service';
 import { Router } from '@angular/router';
 import { HubConnectionState } from '@microsoft/signalr';
-import { UserSignalrDto } from '../models/user.model';
+import { UserRegistrDto, UserSignalrDto } from '../models/user.model';
 import * as signalR from '@microsoft/signalr';
+import { ApiAuthService } from './api-auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  isAuthentificated: boolean = false;
-
   constructor(
     private signalrService: SignalrService,
+    private apiAuthService: ApiAuthService,
     public router: Router
   ) { }
 
   authentificationProcess() {
-    const id = localStorage.getItem('token');
-
-    if (id && this.signalrService.hubConnection) {
+    if (this.signalrService.hubConnection) {
       if (this.signalrService.hubConnection.state === HubConnectionState.Connected) {
         this.reAuthentificationListenerSuccess();
-        this.reAuthentification(id);
+        this.reAuthentification();
       }
 
       else {
         this.signalrService.signalrSubject$.subscribe(response => {
           if (response.type == "HubConnectionStarted") {
             this.reAuthentificationListenerSuccess();
-            this.reAuthentification(id);
+            this.reAuthentification();
           }
         });
       }
     }
+  }
+
+  launchHub(token: string) {
+    this.signalrService.startConnection(token).then(() => {
+      this.authentificationProcess();
+      this.authentificationListenerSuccess();
+      this.authentificationListenerFail();
+      this.registrationListenerSuccess();
+      this.registrationListenerFail();
+      this.signalrService.offConnection(['Authentification_ResponseSuccess', 'Authentification_Fail', 'Registration_Fail', "ngOnDestroy in app"]);
+    }).catch(err => {
+      console.error('Error starting SignalR connection:', err);
+    });
   }
 
   async authentification(email: string, password: string) {
@@ -53,7 +63,6 @@ export class AuthService {
         this.signalrService.userData = { ...user };
         localStorage.setItem('token', user.id.toString());
 
-        this.isAuthentificated = true;
         alert('Logged-in successfully!');
         this.router.navigate(["/edit-products"]);
       });
@@ -62,34 +71,46 @@ export class AuthService {
     }
   }
 
-  async reAuthentification(userId: string) {
-    await this.signalrService.hubConnection.invoke('ReAuthentification', userId)
-      .then(() => {
-        alert("Loading is attempt...");
-      })
-      .catch(err => console.log(err));
-  }
+  async reAuthentification() {
+    try {
+      const userId = this.apiAuthService.getUserId();
+      await this.signalrService.hubConnection.invoke('ReAuthentification', userId)
+        .then(() => {
+          alert("Loading is attempt...");
+        })
+        .catch(err => console.log(err));
+    }
 
-  reAuthentificationListenerSuccess() {
-    if (this.signalrService.hubConnection && this.signalrService.hubConnection.state === signalR.HubConnectionState.Connected) {
-      this.signalrService.hubConnection.on('ReAuthentification_ResponseSuccess', (user: UserSignalrDto) => {
-
-        this.signalrService.userData = { ...user };
-        this.isAuthentificated = true;
-        alert('Re-authentificated!');
-
-        if (this.router.url == "/auth")
-          this.router.navigate(["/edit-products"]);
-      });
-    } else {
-      console.error('Hub connection is not in a connected state.');
+    catch (err) {
+      console.log(err);
     }
   }
 
-  async registration(email: string, password: string) {
-    const userDto = { email: email, password: password };
+  reAuthentificationListenerSuccess() {
+    try {
+      if (this.signalrService.hubConnection && this.signalrService.hubConnection.state === signalR.HubConnectionState.Connected) {
+        this.signalrService.hubConnection.on('ReAuthentification_ResponseSuccess', (user: UserSignalrDto) => {
 
-    await this.signalrService.hubConnection.invoke('Registration', userDto)
+          this.signalrService.userData = { ...user };
+          alert('Re-authentificated!');
+
+          if (this.router.url == "/auth")
+            this.router.navigate(["/edit-products"]);
+        });
+      }
+
+      else {
+        console.error('Hub connection is not in a connected state.');
+      }
+    }
+
+    catch (err) {
+      console.log(err);
+    }
+  }
+
+  async registration(user: UserRegistrDto) {
+    await this.signalrService.hubConnection.invoke('Registration', user)
       .then(() => {
         alert("Loading is attempt...")
       })
@@ -102,7 +123,6 @@ export class AuthService {
         this.signalrService.userData = { ...user };
         localStorage.setItem('token', user.id.toString());
 
-        this.isAuthentificated = true;
         alert('Registrated successfully!');
         this.router.navigate(["/edit-products"]);
       });

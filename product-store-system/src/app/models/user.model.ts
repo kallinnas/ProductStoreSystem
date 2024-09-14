@@ -7,10 +7,18 @@ export class User {
 }
 
 export class UserAuthDto {
-    email: string;
-    password: string;
+    constructor(
+        public email: string,
+        public password: string
+    ) { }
+}
 
-    constructor(email: string, password: string) { this.email = email; this.password = password; }
+export class UserRegistrDto {
+    constructor(
+        public email: string,
+        public password: string,
+        public name: string
+    ) { }
 }
 
 export class UserSignalrDto {

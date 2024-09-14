@@ -4,6 +4,7 @@
     <form fxLayout="column" #form="ngForm" (ngSubmit)="onSubmit(form)">
         <input ngModel name="email" type="email" placeholder="Email" matInput>
         <input ngModel name="password" type="password" placeholder="Password" matInput>
+        <input *ngIf="isRegisterMode" ngModel name="name" type="name" placeholder="Name" matInput>
 
         <button *ngIf="isSignalrMode" mat-raised-button color="primary" [disabled]="!form.valid">
             {{ isRegisterMode ? 'Register' : 'Login' }}
@@ -20,9 +21,9 @@
         {{ isRegisterMode ? 'Already have an account? Login' : 'Need an account? Register' }}
     </button>
 
-    <button (click)="toggleSignalr()" mat-button>
+    <!-- <button (click)="toggleSignalr()" mat-button>
         {{ isSignalrMode ? 'Hub authorization activated' : 'API authorization activated' }}
-    </button>
+    </button> -->
 
     <div *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</div>
 </div>

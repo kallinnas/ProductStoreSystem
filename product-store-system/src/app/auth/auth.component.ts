@@ -4,7 +4,8 @@ import { AuthService } from '../services/auth.service';
 import { GeneralModule } from '../modules/general.module';
 import { NgForm } from '@angular/forms';
 import { ApiAuthService } from '../services/api-auth.service';
-import { Subscription } from 'rxjs';
+import { Subscription, take } from 'rxjs';
+import { UserRegistrDto } from '../models/user.model';
 
 @Component({
   selector: 'app-auth',
@@ -33,16 +34,17 @@ export class AuthComponent {
   }
 
   ngOnDestroy(): void {
-    if (this.isSignalrMode) {
-      this.signalrService.offConnection(['Authentification_ResponseSuccess', 'Authentification_Fail', 'Registration_Fail']);
-      this.subscriptions.forEach(sub => sub.unsubscribe());
-    }
+    // if (this.isSignalrMode) {
+    //   this.signalrService.offConnection(['Authentification_ResponseSuccess', 'Authentification_Fail', 'Registration_Fail']);
+    // }
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   onSubmit(form: NgForm) {
     if (form.valid) {
       if (this.isRegisterMode) {
-        this.authService.registration(form.value.email, form.value.password);
+        const user = new UserRegistrDto(form.value.email, form.value.password, form.value.name);
+        this.authService.registration(user);
       }
 
       else {
@@ -59,40 +61,48 @@ export class AuthComponent {
     this.isRegisterMode = !this.isRegisterMode;
   }
 
-  toggleSignalr() {
-    this.signalrService.switchSignalrMode();
+  // toggleSignalr() {
+  //   try {
+  //     this.signalrService.switchSignalrMode();
 
-    if (this.isSignalrMode) {
-      this.signalrService.startConnection().then(() => {
-        // Ensure the connection is fully established before start authentificationProcess
-        this.authService.authentificationProcess();
-        this.authService.authentificationListenerSuccess();
-        this.authService.authentificationListenerFail();
-        this.authService.registrationListenerSuccess();
-        this.authService.registrationListenerFail();
-      }).catch(err => {
-        console.error('Error starting SignalR connection:', err);
-      });
-    }
+  //     if (this.signalrService.hubConnection.state == HubConnectionState.Connected) {
+  //       this.subscriptions.push(
+  //         this.signalrService.isSignalrModeSubject$.pipe(take(1)).subscribe(isSignalr => {
+  //           // Update the local state
+  //           this.isSignalrMode = isSignalr;
 
-    else {
-      this.signalrService.stopConnection();
-    }
-  }
+  //           // Perform actions based on the new mode
+  //           if (this.isSignalrMode) {
+  //             // Ensure the connection is fully established before starting the authentication process
+  //             const loginToken = localStorage.getItem('token');
+  //             this.authService.launchHub(loginToken ? loginToken : '');
+  //           } else {
+  //             this.signalrService.stopConnection();
+  //           }
+  //         }));
+  //     }
+  //   }
+
+  //   catch (err) {
+  //     console.log(err);
+  //   }
+
+  //   // if (this.isSignalrMode) {
+  //   //   // Ensure the connection is fully established before start authentificationProcess
+  //   //   const loginToken = localStorage.getItem('token')
+  //   //   this.authService.launchHub(loginToken ? loginToken : '');
+  //   // }
+
+  //   // else {
+  //   //   this.signalrService.stopConnection();
+  //   // }
+  // }
 
   loginAPI(form: NgForm) {
     this.apiAuthService.login(form.value.email, form.value.password).subscribe({
       next: response => {
-        localStorage.setItem('token', response.token);
-        const userRole = this.apiAuthService.getUserRole();
-
-        if (userRole === '1') {
-          this.authService.router.navigate(['/display-connection-status']);
-        }
-
-        else {
-          this.authService.router.navigate(['/edit-products']);
-        }
+        // this.signalrService.switchSignalrMode();
+        this.authorizeUser(response.token);
       },
 
       error: err => this.errorMessage = 'Login failed. Please check your credentials.'
@@ -100,13 +110,30 @@ export class AuthComponent {
   }
 
   registerAPI(form: NgForm) {
-    this.apiAuthService.register(form.value.email, form.value.password).subscribe({
+    const user = new UserRegistrDto(form.value.email, form.value.password, form.value.name);
+
+    this.apiAuthService.register(user).subscribe({
       next: response => {
-        localStorage.setItem('token', response.token);
-        this.authService.router.navigate(['/display-products']);
+        this.authorizeUser(response.token);
       },
 
       error: err => this.errorMessage = 'Registration failed. Please try again.'
     });
+  }
+
+  private authorizeUser(token: string) {
+    this.authService.launchHub(token)
+    localStorage.setItem('token', token);
+    const userRole = this.apiAuthService.getUserRole();
+
+    if (userRole) {
+      if (userRole === '1') {
+        this.authService.router.navigate(['/display-connection-status']);
+      }
+
+      else {
+        this.authService.router.navigate(['/edit-products']);
+      }
+    }
   }
 }

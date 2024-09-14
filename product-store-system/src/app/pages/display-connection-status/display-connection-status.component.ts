@@ -45,20 +45,32 @@ export class DisplayConnectionStatusComponent implements OnInit {
     this.signalrService.hubConnection.on('Logout_Response', () => {
       localStorage.removeItem('token');
       location.reload();
-      // this.signalrService.hubConnection.stop();
+      this.signalrService.hubConnection.stop();
     });
   }
 
   userOnline(): void {
-    this.signalrService.hubConnection.on('User_Online', (person: UserSignalrDto) => {
-      this.usersOnline.push(person);
-    });
+    try {
+      this.signalrService.hubConnection.on('User_Online', (user: UserSignalrDto) => {
+        this.usersOnline.push(user);
+      });
+    }
+
+    catch (err) {
+      console.log(err);
+    }
   }
 
   userOffline(): void {
-    this.signalrService.hubConnection.on('User_Offline', (personId: string) => {
-      this.usersOnline = this.usersOnline.filter(p => p.id != personId);
-    });
+    try {
+      this.signalrService.hubConnection.on('User_Offline', (userId: string) => {
+        this.usersOnline = this.usersOnline.filter(u => u.id != userId);
+      });
+    }
+
+    catch (err) {
+      console.log(err);
+    }
   }
 
   getOnlineUsersInv(): void {

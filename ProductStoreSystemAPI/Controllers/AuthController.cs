@@ -1,35 +1,39 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using ProductStoreSystemAPI.Data;
+using ProductStoreSystemAPI.Hubs;
 using ProductStoreSystemAPI.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using ProductStoreSystemAPI.Services.Interfaces;
 
 
 namespace ProductStoreSystemAPI.Controllers;
+
+public class TokenRequest { public string Token { get; set; } }
 
 [Route("api/[controller]")]
 [ApiController]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly IConfiguration _configuration;
+    private readonly IAuthService _authService;
 
-    public AuthController(AppDbContext context, IConfiguration configuration)
+    public AuthController(IAuthService authService)
     {
-        _context = context;
-        _configuration = configuration;
+        _authService = authService;
+    }
+
+    [HttpPost("validateToken")]
+    public async Task<IActionResult> ValidateToken([FromBody] TokenRequest request)
+    {
+        bool isValid = await _authService.ValidateTokenAsync(request.Token);
+        return Ok(isValid);
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] UserAuthDto userDto)
+    public async Task<IActionResult> Login([FromBody] UserAuthDto userDto)
     {
-        var user = _context.Users.SingleOrDefault(u => u.Email == userDto.Email);
+        var token = await _authService.LoginAsync(userDto);
 
-        if (user != null && BCrypt.Net.BCrypt.Verify(userDto.Password, user.PasswordHash))
+        if (token != null)
         {
-            var token = GenerateJwtToken(user);
             return Ok(new { token });
         }
 
@@ -37,58 +41,15 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    public IActionResult Register([FromBody] UserAuthDto userDto)
+    public async Task<IActionResult> Register([FromBody] UserRegistrDto userDto)
     {
-        if (_context.Users.Any(u => u.Email == userDto.Email))
+        var token = await _authService.RegisterAsync(userDto);
+        if (token != null)
         {
-            return BadRequest("Email is already taken.");
+            return Ok(new { token });
         }
 
-        var newUser = new User
-        {
-            Email = userDto.Email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password),
-            Role = (sbyte)(!_context.Users.Any() ? 1 : 0) // first user beccomes admin (Role = 1), others are customers (Role = 0)
-        };
-
-        _context.Users.Add(newUser);
-        _context.SaveChanges();
-
-        var token = GenerateJwtToken(newUser);
-        return Ok(new { token });
+        return BadRequest("Email is already taken.");
     }
-
-    private string GenerateJwtToken(User user)
-    {
-        var jwtKey = _configuration["Jwt:Key"];
-
-        if (string.IsNullOrEmpty(jwtKey))
-        {
-            throw new InvalidOperationException("JWT Key is not set in the configuration.");
-        }
-
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim("role", user.Role.ToString()),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-
 }
-
 
