@@ -23,17 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.signalrService.isSignalrModeSubject$.subscribe(isSignalr => {
-        this.isSignalr = isSignalr;
-
-        if (isSignalr) {
-          this.signalrService.startConnection();
-        }
-
-        else {
-          this.signalrService.stopConnection();
-        }
-      }));
+      this.signalrService.isSignalrModeSubject$.subscribe(isSignalr => { this.isSignalr = isSignalr; }));
   }
 
   ngOnDestroy(): void {

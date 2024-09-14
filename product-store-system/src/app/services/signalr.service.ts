@@ -15,23 +15,23 @@ export class SignalrService {
   private isSignalrModeSubject = new BehaviorSubject<boolean>(false);
   isSignalrModeSubject$ = this.isSignalrModeSubject.asObservable();
 
-  startConnection = () => {
-    // const token = localStorage.getItem('token');
-
+  startConnection = (): Promise<void> => {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.hubURL, {
-        skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets
-        // , accessTokenFactory: () =>  ''
+        skipNegotiation: true,
+        transport: signalR.HttpTransportType.WebSockets
       })
       .build();
 
-
-    this.hubConnection.start()
+    return this.hubConnection.start()
       .then(() => {
         console.log('Hub connection started!');
         this.signalrSubject.next({ type: 'HubConnectionStarted' });
       })
-      .catch(err => console.log('Error while srating conn: ' + err));
+      .catch(err => {
+        console.log('Error while starting connection: ' + err);
+        throw err;
+      });
   }
 
   stopConnection = () => {

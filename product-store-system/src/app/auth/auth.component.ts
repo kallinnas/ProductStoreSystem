@@ -27,16 +27,8 @@ export class AuthComponent {
   ) { }
 
   ngOnInit(): void {
-
     this.subscriptions.push(this.signalrService.isSignalrModeSubject$.subscribe(isSignalr => {
       this.isSignalrMode = isSignalr;
-
-      if (isSignalr) {
-        this.authService.authentificationListenerSuccess();
-        this.authService.authentificationListenerFail();
-        this.authService.registrationListenerSuccess();
-        this.authService.registrationListenerFail();
-      }
     }));
   }
 
@@ -70,9 +62,17 @@ export class AuthComponent {
   toggleSignalr() {
     this.signalrService.switchSignalrMode();
 
-    if (!this.isSignalrMode) {
-      this.authService.authentificationProcess();
-      this.signalrService.startConnection();
+    if (this.isSignalrMode) {
+      this.signalrService.startConnection().then(() => {
+        // Ensure the connection is fully established before start authentificationProcess
+        this.authService.authentificationProcess();
+        this.authService.authentificationListenerSuccess();
+        this.authService.authentificationListenerFail();
+        this.authService.registrationListenerSuccess();
+        this.authService.registrationListenerFail();
+      }).catch(err => {
+        console.error('Error starting SignalR connection:', err);
+      });
     }
 
     else {
