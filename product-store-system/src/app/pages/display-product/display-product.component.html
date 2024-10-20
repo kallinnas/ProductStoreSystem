@@ -14,32 +14,39 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-card fxFlex fxLayout="column" fxLayoutGap="10px" style="width: 45vw; margin: 20px auto;">
+  <mat-card fxFlex fxLayout="column" fxLayoutGap="10px" fxFlexFill style="margin: 20px;">
+
     <mat-card-header>
       <mat-card-title>Product List</mat-card-title>
     </mat-card-header>
 
-    <mat-card-content fxLayout="column" fxLayoutAlign="start stretch" fxLayoutGap="10px"
-      style="overflow: auto; height: 100%;">
-      <mat-list *ngIf="filteredProducts.length > 0">
-        <mat-list-item *ngFor="let product of filteredProducts" fxLayout="row" fxLayoutAlign="start center"
-          style="flex-wrap: nowrap;">
-          <div fxFlex="30%"  style="padding: 0 10px; box-sizing: border-box;">
-            <strong>{{ product.name }}</strong>
-          </div>
-          <div fxFlex="30%" style="padding: 0 10px; box-sizing: border-box;">
-            {{ product.desc }}
-          </div>
-          <div fxFlex="40%" style="padding: 0 10px; text-align: left; box-sizing: border-box;">
-            Price: {{ product.price | currency }}
-          </div>
-        </mat-list-item>
-      </mat-list>
+    <mat-card-content fxLayout="column" fxLayoutAlign="start stretch">
+      <div style="overflow-x: auto;">
+        <table mat-table [dataSource]="filteredProducts" style="width: 100%;">
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let product"> {{ product.name }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="desc">
+            <th mat-header-cell *matHeaderCellDef> Description </th>
+            <td mat-cell *matCellDef="let product"> {{ product.desc }} </td>
+          </ng-container>
+
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef> Price </th>
+            <td mat-cell *matCellDef="let product"> {{ product.price | currency }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['name', 'desc', 'price']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['name', 'desc', 'price'];"></tr>
+        </table>
+      </div>
 
       <p *ngIf="filteredProducts.length === 0">No products match your filter.</p>
     </mat-card-content>
 
   </mat-card>
-
 
 </div>

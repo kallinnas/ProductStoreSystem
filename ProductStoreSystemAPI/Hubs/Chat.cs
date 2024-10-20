@@ -4,7 +4,7 @@ using ProductStoreSystemAPI.Models;
 
 namespace ProductStoreSystemAPI.Hubs;
 
-public partial class ConnectionHub
+public partial class ConnectionHub: Hub
 {
     public async Task GetOnlineUsers()
     {

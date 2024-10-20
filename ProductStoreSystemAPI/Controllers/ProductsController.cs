@@ -38,7 +38,6 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "1")]
     public async Task<ActionResult<Product>> PostProduct(ProductDto dto)
     {
         try
@@ -62,7 +61,6 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Roles = "1")]
     public async Task<IActionResult> DeleteProduct(long id)
     {
         try

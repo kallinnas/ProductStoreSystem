@@ -25,6 +25,14 @@ export class DisplayProductComponent {
   }
 
   filterProducts() {
-    this.filteredProducts = this.products.filter(p => p.name.toLowerCase().includes(this.filter.toLowerCase()));
+    this.filteredProducts = this.products.filter(p => {
+      const lowerCaseFilter = this.filter.toLowerCase();
+      return (
+        p.name.toLowerCase().includes(lowerCaseFilter) ||
+        p.desc.toLowerCase().includes(lowerCaseFilter) ||
+        p.price.toString().includes(lowerCaseFilter)
+      );
+    });
   }
+
 }

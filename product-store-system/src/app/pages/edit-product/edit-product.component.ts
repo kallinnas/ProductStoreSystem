@@ -3,6 +3,7 @@ import { GeneralModule } from '../../modules/general.module';
 import { ProductService } from '../../services/product.service';
 import { ProductDto } from '../../models/product.model';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AppService } from '../../services/app.service';
 
 @Component({
   selector: 'app-edit-product',
@@ -19,7 +20,11 @@ export class EditProductComponent {
   newProductDesc = '';
   newProductPrice = 0;
 
-  constructor(private productService: ProductService, private fb: FormBuilder) {
+  constructor(
+    private productService: ProductService, 
+    public appService: AppService,
+    private fb: FormBuilder
+  ) {
     this.loadProducts();
     this.initialForm();
   }

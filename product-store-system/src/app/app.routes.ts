@@ -11,7 +11,6 @@ export const routes: Routes = [
     { path: 'display-connection-status', loadChildren: () => import('./pages/display-connection-status/display-connection-status.module').then(m => m.DisplayConnectionStatusModule), canActivate: [AuthGuard]},
     { path: '**', redirectTo: 'auth', pathMatch: 'full' },
 ];
-// , data: { role: 'admin' } 
 
 @NgModule({
     imports: [RouterModule.forRoot(routes)],

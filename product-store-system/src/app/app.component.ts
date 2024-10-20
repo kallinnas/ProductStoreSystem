@@ -1,11 +1,13 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
 import { GeneralModule } from './modules/general.module';
-import { AuthService } from './services/auth.service';
 import { filter, Subscription } from 'rxjs';
+
 import { ApiAuthService } from './services/api-auth.service';
 import { SignalrService } from './services/signalr.service';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { AuthService } from './services/auth.service';
+import { AppService } from './services/app.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +23,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isAuthPage: boolean = false;
 
   constructor(
+    public appService: AppService,
     public authService: AuthService,
     public apiAuthService: ApiAuthService,
     public signalrService: SignalrService,
@@ -53,5 +56,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(sub => sub.unsubscribe());
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkWindowSize();
+  }
+
+  private checkWindowSize() {
+    this.appService.isMobileMode.set(window.innerWidth < 800);
   }
 }
