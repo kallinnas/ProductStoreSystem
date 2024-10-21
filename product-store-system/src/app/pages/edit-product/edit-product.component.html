@@ -33,7 +33,7 @@
     </mat-card-content>
   </mat-card>
 
-  <mat-card fxFlex.lt-sm="75" [ngClass]="appService.isMobileMode() ? '' : 'list'">
+  <mat-card fxFlex.lt-sm="75" [ngClass]="appService.isMobileMode() ? '' : 'product_list'">
     <mat-card-header>
       <mat-card-title>Product List</mat-card-title>
     </mat-card-header>
@@ -64,7 +64,7 @@
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="['name', 'desc', 'price', 'actions']"></tr>
+        <tr mat-header-row *matHeaderRowDef="['name', 'desc', 'price', 'actions']; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: ['name', 'desc', 'price', 'actions'];"></tr>
       </table>
 
