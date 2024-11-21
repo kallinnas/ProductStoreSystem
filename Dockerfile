@@ -4,13 +4,14 @@ WORKDIR /app
 COPY . ./
 RUN dotnet restore
 RUN dotnet build -c Release --no-restore
-
-# Stage 2: Publish the application
 RUN dotnet publish -c Release -o /app/publish --no-build --no-restore
 
-# Stage 3: Setup the runtime container
+# Stage 2: Setup the runtime container
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-ENTRYPOINT ["dotnet", "YourAppName.dll"]
+# Apply database migrations
+RUN dotnet ef database update --no-build --environment Production
+
+ENTRYPOINT ["dotnet", "ProductStoreSystemAPI.dll"]
