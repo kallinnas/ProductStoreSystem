@@ -1,17 +1,36 @@
-﻿# Stage 1: Build the application
+﻿# Use the .NET SDK image to build the application
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
-COPY . ./
+
+# Copy the solution file and project files
+COPY ./ProductStoreSystemAPI/ProductStoreSystemAPI.sln ./ProductStoreSystemAPI/
+COPY ./ProductStoreSystemAPI/*.csproj ./ProductStoreSystemAPI/
+
+# Copy the rest of the server files
+COPY ./ProductStoreSystemAPI/ ./ProductStoreSystemAPI/
+
+# Restore dependencies
+WORKDIR /app/ProductStoreSystemAPI
 RUN dotnet restore
-RUN dotnet build -c Release --no-restore
-RUN dotnet publish -c Release -o /app/publish --no-build --no-restore
 
-# Stage 2: Setup the runtime container
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+# Build and publish the application
+RUN dotnet publish -c Release -o out
+
+# Create the runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 WORKDIR /app
-COPY --from=build /app/publish .
 
-# Apply database migrations
+# Copy the published application from the build stage
+COPY --from=build /app/ProductStoreSystemAPI/out .
+
+# Install MySQL client (if needed for DB interactions, optional)
+RUN apt-get update && apt-get install -y mysql-client
+
+# Expose port 80 for the application
+EXPOSE 80
+
+# Apply database migrations (if required in production)
 RUN dotnet ef database update --no-build --environment Production
 
+# Set the entry point for the application
 ENTRYPOINT ["dotnet", "ProductStoreSystemAPI.dll"]
