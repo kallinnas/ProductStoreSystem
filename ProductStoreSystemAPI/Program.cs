@@ -57,7 +57,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("AllowAllHeaders");
+app.UseCors("CorsPolicy");
 
 // SIGNAL_R
 app.UseEndpoints(endpoints =>
