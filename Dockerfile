@@ -1,21 +1,16 @@
-﻿# Use the official .NET SDK image to build the application
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
+﻿# Stage 1: Build the application
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /app
-
-# Copy everything and restore dependencies
 COPY . ./
 RUN dotnet restore
+RUN dotnet build -c Release --no-restore
 
-# Build the application
-RUN dotnet publish -c Release -o out
+# Stage 2: Publish the application
+RUN dotnet publish -c Release -o /app/publish --no-build --no-restore
 
-# Use the official .NET runtime image to run the application
+# Stage 3: Setup the runtime container
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
-COPY --from=build-env /app/out .
+COPY --from=build /app/publish .
 
-# Expose port 5000 for the app
-EXPOSE 5000
-
-# Set the entry point for the application
-ENTRYPOINT ["dotnet", "ProductStoreSystemAPI.dll"]
+ENTRYPOINT ["dotnet", "YourAppName.dll"]
