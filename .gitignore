@@ -8,3 +8,5 @@
 /ProductStoreSystemAPI/obj
 /Characteristics.docx
 /~$aracteristics.docx
+/ProductStoreSystemAPI/appsettings.Development.json
+/ProductStoreSystemAPI/Migrations

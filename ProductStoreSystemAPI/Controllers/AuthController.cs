@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ProductStoreSystemAPI.Data;
-using ProductStoreSystemAPI.Hubs;
 using ProductStoreSystemAPI.Models;
 using ProductStoreSystemAPI.Services.Interfaces;
 
