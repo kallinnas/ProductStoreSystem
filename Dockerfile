@@ -1,36 +1,33 @@
-﻿# Use the .NET SDK image to build the application
+﻿# Use the official .NET 6 SDK image as the base image for building the app
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy the solution file and project files
-COPY ./ProductStoreSystemAPI/ProductStoreSystemAPI.sln ./ProductStoreSystemAPI/
+# Copy the main project file into the container
 COPY ./ProductStoreSystemAPI/*.csproj ./ProductStoreSystemAPI/
 
-# Copy the rest of the server files
-COPY ./ProductStoreSystemAPI/ ./ProductStoreSystemAPI/
+# Restore the project dependencies
+RUN dotnet restore ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj
 
-# Restore dependencies
-WORKDIR /app/ProductStoreSystemAPI
-RUN dotnet restore
+# Copy the entire project into the container
+COPY ./ProductStoreSystemAPI ./ProductStoreSystemAPI
 
-# Build and publish the application
-RUN dotnet publish -c Release -o out
+# Build the project
+RUN dotnet publish ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj -c Release -o /app/out
 
-# Create the runtime image
+# Use a smaller runtime image for deployment
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+
+# Set the working directory in the runtime container
 WORKDIR /app
 
-# Copy the published application from the build stage
-COPY --from=build /app/ProductStoreSystemAPI/out .
+# Copy the published output from the build stage
+COPY --from=build /app/out .
 
-# Install MySQL client (if needed for DB interactions, optional)
-RUN apt-get update && apt-get install -y mysql-client
+# Expose port 5000 for HTTP and 5001 for HTTPS
+EXPOSE 5000
+EXPOSE 5001
 
-# Expose port 80 for the application
-EXPOSE 80
-
-# Apply database migrations (if required in production)
-RUN dotnet ef database update --no-build --environment Production
-
-# Set the entry point for the application
+# Specify the entry point for the app
 ENTRYPOINT ["dotnet", "ProductStoreSystemAPI.dll"]
