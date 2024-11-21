@@ -1,1 +1,0 @@
-import{V as o,cb as e}from"./chunk-3SPXI7PS.js";var s=(()=>{class t{isMobileMode=e(!1);constructor(){}static \u0275fac=function(r){return new(r||t)};static \u0275prov=o({token:t,factory:t.\u0275fac,providedIn:"root"})}return t})();export{s as a};
