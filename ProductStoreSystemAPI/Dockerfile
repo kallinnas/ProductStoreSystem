@@ -1,36 +1,33 @@
-﻿# Use the official .NET SDK (includes build tools) for building the app
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+﻿# Use the official .NET 6 SDK image as the base image for building the app
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+# Set the working directory in the container
 WORKDIR /app
 
-# Install dotnet-ef tool globally for database migrations
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
+# Copy the main project file into the container
+COPY ./ProductStoreSystemAPI/*.csproj ./ProductStoreSystemAPI/
 
-# Copy project files to the container
-COPY . ./
+# Restore the project dependencies
+RUN dotnet restore ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj
 
-# Restore dependencies
-RUN dotnet restore
+# Copy the entire project into the container
+COPY ./ProductStoreSystemAPI ./ProductStoreSystemAPI
 
-# Build the application in Release mode
-RUN dotnet publish -c Release -o out --no-restore
+# Build the project
+RUN dotnet publish ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj -c Release -o /app/out
 
-# Use a lightweight runtime image for running the app
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# Use a smaller runtime image for deployment
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+
+# Set the working directory in the runtime container
 WORKDIR /app
 
-# Install MySQL client for database interactions if necessary
-RUN apt-get update && apt-get install -y default-mysql-client && apt-get clean
+# Copy the published output from the build stage
+COPY --from=build /app/out .
 
-# Copy the published application from the build stage
-COPY --from=build /app/out ./
+# Expose port 5000 for HTTP and 5001 for HTTPS
+EXPOSE 5000
+EXPOSE 5001
 
-# Expose port 80 for the application
-EXPOSE 80
-
-# Set environment variables for runtime
-ENV ASPNETCORE_ENVIRONMENT=Production
-ENV SIGNALR_MYSQL_CONNECTION_STRING="server=autorack.proxy.rlwy.net;port=34922;database=railway;user=root;password=PWBPzByrfeFRiZcaROtUASpbjFAfUJhk"
-
-# Start the application
+# Specify the entry point for the app
 ENTRYPOINT ["dotnet", "ProductStoreSystemAPI.dll"]
