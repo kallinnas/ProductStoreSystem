@@ -11,7 +11,7 @@ public class JwtService
     private readonly IConfiguration _configuration;
     public JwtService(IConfiguration configuration) { _configuration = configuration; }
 
-    public string GenerateJwtToken(User user)
+    public string GenerateJwtToken(User_SP user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);

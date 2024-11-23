@@ -34,7 +34,7 @@ public class AuthService : IAuthService
             return null;
         }
 
-        var newUser = new User
+        var newUser = new User_SP
         {
             Email = userDto.Email,
             Name = userDto.Name,

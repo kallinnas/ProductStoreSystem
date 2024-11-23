@@ -36,7 +36,7 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            var user = await context.Users.SingleOrDefaultAsync(p => p.Email == dto.Email);
+            var user = await context.Users_SP.SingleOrDefaultAsync(p => p.Email == dto.Email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
@@ -56,7 +56,7 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            var person = await context.Users.SingleOrDefaultAsync(u => u.Id == userId);
+            var person = await context.Users_SP.SingleOrDefaultAsync(u => u.Id == userId);
 
             if (person == null)
             {
@@ -76,20 +76,20 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            if (context.Users.Any(u => u.Email == dto.Email))
+            if (context.Users_SP.Any(u => u.Email == dto.Email))
             {
                 await Clients.Caller.SendAsync("Registration_Fail", Context.ConnectionId);
             }
 
-            var newUser = new User
+            var newUser = new User_SP
             {
                 Email = dto.Email,
                 Name = dto.Name,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                Role = (sbyte)(!context.Users.Any() ? 1 : 0) // first user becomes admin (Role = 1), others are customers (Role = 0)
+                Role = (sbyte)(!context.Users_SP.Any() ? 1 : 0) // first user becomes admin (Role = 1), others are customers (Role = 0)
             };
 
-            context.Users.Add(newUser);
+            context.Users_SP.Add(newUser);
             context.SaveChanges();
 
             await Login(newUser, "Registration_ResponseSuccess");
@@ -101,7 +101,7 @@ public partial class ConnectionHub : Hub
         }
     }
 
-    private async Task Login(User user, string successMethod)
+    private async Task Login(User_SP user, string successMethod)
     {
         try
         {

@@ -9,7 +9,7 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Connection> Connections { get; set; }
     public virtual DbSet<Product> Products { get; set; }
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<User_SP> Users_SP { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,11 +56,11 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("price");
         });
 
-        modelBuilder.Entity<User>(entity =>
+        modelBuilder.Entity<User_SP>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("users");
+            entity.ToTable("users_sp");
 
             entity.HasIndex(e => e.Email, "email").IsUnique();
 

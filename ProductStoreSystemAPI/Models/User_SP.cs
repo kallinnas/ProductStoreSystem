@@ -1,6 +1,6 @@
 ﻿namespace ProductStoreSystemAPI.Models;
 
-public class User
+public class User_SP
 {
     public Guid Id { get; set; }
     public sbyte Role { get; set; }

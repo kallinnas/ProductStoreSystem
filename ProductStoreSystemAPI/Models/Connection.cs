@@ -12,7 +12,7 @@ public class Connection
     public Guid UserId { get; set; }
     public string SignalrId { get; set; } = null!;
     public DateTime? TimeStamp { get; set; }
-    public virtual User User { get; set; } = null!;
+    public virtual User_SP User { get; set; } = null!;
 }
 
 //public class ConnectionDbDto

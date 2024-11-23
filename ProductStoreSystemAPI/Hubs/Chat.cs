@@ -13,7 +13,7 @@ public partial class ConnectionHub: Hub
         var onlineUsers = await context.Connections
             .Where(c => c.UserId != userId)
             .Select(c => new UserSignalrDto(c.UserId,
-                context.Users.Where(p => p.Id == c.UserId)
+                context.Users_SP.Where(p => p.Id == c.UserId)
                 .Select(p => p.Name ?? "Unknown").SingleOrDefault() ?? "Unknown", c.SignalrId))
             .ToListAsync();
 
