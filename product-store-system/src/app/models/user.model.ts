@@ -1,4 +1,4 @@
-export class User {
+export class User_SP {
     id!: string;
     role!: number;
     name!: string;
