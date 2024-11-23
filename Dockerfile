@@ -2,7 +2,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /src
 
 # Copy the main project file and restore dependencies
 COPY ProductStoreSystemAPI/*.csproj ./ProductStoreSystemAPI/
@@ -12,7 +12,7 @@ RUN dotnet restore ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj
 COPY ProductStoreSystemAPI ./ProductStoreSystemAPI
 
 # Build the project in Release mode
-RUN dotnet publish ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj -c Release -o /app/out
+RUN dotnet publish ./ProductStoreSystemAPI/ProductStoreSystemAPI.csproj -c Release -o /app
 
 # Use the official .NET 6 runtime image for deployment
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
@@ -21,11 +21,15 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
 WORKDIR /app
 
 # Copy the built application from the build stage
-COPY --from=build /app/out .
+COPY --from=build /app .
 
-# Expose ports (5000 for HTTP, 5001 for HTTPS)
-EXPOSE 5000
-EXPOSE 5001
+# Expose ports for Railway to map
+EXPOSE 80
+EXPOSE 443
+
+# Environment variables for Railway MySQL database
+ENV ASPNETCORE_URLS=http://+:80
+ENV SIGNALR_MYSQL_CONNECTION_STRING="server=${MYSQLHOST};port=${MYSQLPORT};database=${MYSQLDATABASE};user=${MYSQLUSER};password=${MYSQLPASSWORD}"
 
 # Set the entry point for the application
 ENTRYPOINT ["dotnet", "ProductStoreSystemAPI.dll"]
