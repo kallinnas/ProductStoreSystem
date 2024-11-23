@@ -8,15 +8,13 @@ public static class JwtServiceExtensions
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        //var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);
-        var jwtSettings = configuration.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!);
 
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
+        }).AddJwtBearer(options =>
         {
             options.Events = new JwtBearerEvents
             {
@@ -34,13 +32,13 @@ public static class JwtServiceExtensions
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
                 ValidateIssuer = true,
                 ValidIssuer = configuration["Jwt:Issuer"],
                 ValidateAudience = true,
                 ValidAudience = configuration["Jwt:Audience"],
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero // Set to zero to avoid any expiration tolerance
             };
         });
 
