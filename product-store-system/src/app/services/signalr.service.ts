@@ -20,7 +20,7 @@ export class SignalrService {
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => loginToken,
       })
-      .withAutomaticReconnect()
+      // .withAutomaticReconnect()
       .build();
 
     return this.hubConnection.start()
