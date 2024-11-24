@@ -13,13 +13,14 @@ export class SignalrService {
   private signalrSubject = new Subject<any>();
   signalrSubject$ = this.signalrSubject.asObservable();
 
-  startConnection = (loginToken: string): Promise<void> => {
+  startConnection = (loginToken: string): Promise<void> => {   
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(environment.hubURL, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         accessTokenFactory: () => loginToken,
       })
+      .withAutomaticReconnect()
       .build();
 
     return this.hubConnection.start()
