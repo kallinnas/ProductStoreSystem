@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using ProductStoreSystemAPI.Services;
 using System.Text;
 
 namespace ProductStoreSystemAPI.Extensions;
@@ -9,6 +10,7 @@ public static class JwtServiceExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("Jwt");
+        services.AddScoped<JwtService>();
 
         services.AddAuthentication(options =>
         {
@@ -25,7 +27,9 @@ public static class JwtServiceExtensions
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
+                //IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(GetJwtKey())),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(GetJwtKey(services))),
+                //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
                 ClockSkew = TimeSpan.Zero 
             };
 
@@ -47,5 +51,15 @@ public static class JwtServiceExtensions
         });
 
         return services;
+    }
+
+    private static string GetJwtKey(IServiceCollection services)
+    {
+        // Build a service provider to resolve the JwtService from DI
+        using (var serviceProvider = services.BuildServiceProvider())
+        {
+            var jwtService = serviceProvider.GetRequiredService<JwtService>();
+            return jwtService.GetJwtKey(); // Get JWT key from the JwtService instance
+        }
     }
 }

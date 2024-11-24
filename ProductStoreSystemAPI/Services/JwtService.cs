@@ -74,7 +74,7 @@ public class JwtService
         }
     }
 
-    private string GetJwtKey()
+    public string GetJwtKey()
     {
         if (_env.IsProduction())
         {

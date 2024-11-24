@@ -63,7 +63,6 @@ app.UseCors("CorsPolicy");
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-
     endpoints.MapHub<ConnectionHub>("/ConnectionHub").RequireAuthorization();
 });
 
