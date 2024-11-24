@@ -89,6 +89,8 @@ public static class JwtServiceExtensions
             };
         });
 
+        Console.WriteLine($"Token received: SSSSSSSSSSSSSSSSSSS");
+        Console.WriteLine(services);
         return services;
     }
 }
