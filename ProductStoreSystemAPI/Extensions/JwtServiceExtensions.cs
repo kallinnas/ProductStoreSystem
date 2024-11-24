@@ -51,7 +51,7 @@ public static class JwtServiceExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("Jwt");
-        Console.WriteLine($"Token received: JwtServiceExtensions");
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -59,6 +59,18 @@ public static class JwtServiceExtensions
         })
         .AddJwtBearer(options =>
         {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
+                ClockSkew = TimeSpan.Zero 
+            };
+
             // Include access_token support for SignalR
             options.Events = new JwtBearerEvents
             {
@@ -70,27 +82,12 @@ public static class JwtServiceExtensions
                     {
                         context.Token = accessToken;
                     }
-                    Console.WriteLine($"Token received: {accessToken}");
 
                     return Task.CompletedTask;
                 }
             };
-
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtSettings["Issuer"],
-                ValidAudience = jwtSettings["Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
-                ClockSkew = TimeSpan.Zero
-            };
         });
 
-        Console.WriteLine($"Token received: SSSSSSSSSSSSSSSSSSS");
-        Console.WriteLine(services);
         return services;
     }
 }

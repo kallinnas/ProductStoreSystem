@@ -63,7 +63,13 @@ app.UseCors("CorsPolicy");
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
-    endpoints.MapHub<ConnectionHub>("/ConnectionHub").RequireAuthorization();
+
+    endpoints.MapHub<ConnectionHub>("/ConnectionHub", options =>
+    {
+        options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets |
+                             Microsoft.AspNetCore.Http.Connections.HttpTransportType.ServerSentEvents;
+    });
+    //endpoints.MapHub<ConnectionHub>("/ConnectionHub").RequireAuthorization();
 });
 
 app.MapFallbackToFile("index.html"); // fallback for SPA called after app.UseEndpoints
