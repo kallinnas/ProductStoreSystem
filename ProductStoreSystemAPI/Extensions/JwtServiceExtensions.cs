@@ -51,7 +51,7 @@ public static class JwtServiceExtensions
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
         var jwtSettings = configuration.GetSection("Jwt");
-
+        Console.WriteLine($"Token received: JwtServiceExtensions");
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -70,6 +70,7 @@ public static class JwtServiceExtensions
                     {
                         context.Token = accessToken;
                     }
+                    Console.WriteLine($"Token received: {accessToken}");
 
                     return Task.CompletedTask;
                 }
