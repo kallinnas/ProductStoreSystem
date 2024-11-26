@@ -15,19 +15,19 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<User_SP?> GetUserByEmailAsync(string email)
+    public async Task<User_Ps?> GetUserByEmailAsync(string email)
     {
-        return await _context.Users_SP.FirstOrDefaultAsync(u => u.Email == email);
+        return await _context.Users_Ps.FirstOrDefaultAsync(u => u.Email == email);
     }
 
-    public async Task AddUserAsync(User_SP user)
+    public async Task AddUserAsync(User_Ps user)
     {
-        await _context.Users_SP.AddAsync(user);
+        await _context.Users_Ps.AddAsync(user);
     }
 
     public async Task<bool> IsEmailTakenAsync(string email)
     {
-        return await _context.Users_SP.AnyAsync(u => u.Email == email);
+        return await _context.Users_Ps.AnyAsync(u => u.Email == email);
     }
 
     public async Task<int> SaveChangesAsync()
@@ -38,6 +38,6 @@ public class UserRepository : IUserRepository
     public async Task<sbyte> IsAdmin()
     {
         // first user beccomes admin (Role = 1), others are customers (Role = 0)
-        return (sbyte)(!(await _context.Users_SP.AnyAsync()) ? 1 : 0);
+        return (sbyte)(!(await _context.Users_Ps.AnyAsync()) ? 1 : 0);
     }
 }

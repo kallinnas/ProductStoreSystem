@@ -1,13 +1,13 @@
 ﻿namespace ProductStoreSystemAPI.Models;
 
-public class User_SP
+public class User_Ps
 {
     public Guid Id { get; set; }
     public sbyte Role { get; set; }
     public string Name { get; set; } = "";
     public string Email { get; set; } = null!;
     public string PasswordHash { get; set; } = null!;
-    public virtual ICollection<Connection> Connections { get; set; } = new List<Connection>();
+    public virtual ICollection<Connection_Ps> Connections { get; set; } = new List<Connection_Ps>();
 }
 
 public class UserAuthDto

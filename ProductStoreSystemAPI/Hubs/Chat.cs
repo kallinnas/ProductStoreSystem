@@ -10,10 +10,10 @@ public partial class ConnectionHub: Hub
     {
         var userId = await GetUserId();
 
-        var onlineUsers = await context.Connections
+        var onlineUsers = await context.Connections_Ps
             .Where(c => c.UserId != userId)
             .Select(c => new UserSignalrDto(c.UserId,
-                context.Users_SP.Where(p => p.Id == c.UserId)
+                context.Users_Ps.Where(p => p.Id == c.UserId)
                 .Select(p => p.Name ?? "Unknown").SingleOrDefault() ?? "Unknown", c.SignalrId))
             .ToListAsync();
 

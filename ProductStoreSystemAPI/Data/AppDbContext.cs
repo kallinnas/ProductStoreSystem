@@ -7,17 +7,43 @@ public partial class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public virtual DbSet<Connection> Connections { get; set; }
+    public virtual DbSet<Connection_Ps> Connections_Ps { get; set; }
+    public virtual DbSet<User_Ps> Users_Ps { get; set; }
     public virtual DbSet<Product> Products { get; set; }
-    public virtual DbSet<User_SP> Users_SP { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Connection>(entity =>
+        modelBuilder.Entity<User_Ps>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PRIMARY");
 
-            entity.ToTable("connections");
+            entity.ToTable("users_ps");
+
+            entity.HasIndex(e => e.Email, "email").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .HasColumnName("email");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
+            entity.Property(e => e.PasswordHash)
+                .HasMaxLength(60)
+                .HasColumnName("passwordHash");
+            entity.Property(e => e.Role).HasColumnName("role");
+
+            entity.HasMany(e => e.Connections)
+                .WithOne(c => c.User)
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Connection_Ps>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PRIMARY");
+
+            entity.ToTable("connections_ps");
 
             entity.HasIndex(e => e.UserId, "userId");
 
@@ -54,32 +80,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Price).HasColumnType("numeric")
                 .HasPrecision(10, 2)
                 .HasColumnName("price");
-        });
-
-        modelBuilder.Entity<User_SP>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PRIMARY");
-
-            entity.ToTable("users_sp");
-
-            entity.HasIndex(e => e.Email, "email").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Email)
-                .HasMaxLength(50)
-                .HasColumnName("email");
-            entity.Property(e => e.Name)
-                .HasMaxLength(50)
-                .HasColumnName("name");
-            entity.Property(e => e.PasswordHash)
-                .HasMaxLength(60)
-                .HasColumnName("passwordHash");
-            entity.Property(e => e.Role).HasColumnName("role");
-
-            entity.HasMany(e => e.Connections)
-                .WithOne(c => c.User)
-                .HasForeignKey(c => c.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);

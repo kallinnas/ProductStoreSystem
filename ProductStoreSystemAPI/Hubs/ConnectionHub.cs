@@ -16,9 +16,9 @@ public partial class ConnectionHub : Hub
         {
             var userId = await GetUserId();
 
-            var connections = await context.Connections.Where(conn => conn.UserId == userId).ToListAsync();
+            var connections = await context.Connections_Ps.Where(conn => conn.UserId == userId).ToListAsync();
 
-            context.Connections.RemoveRange(connections);
+            context.Connections_Ps.RemoveRange(connections);
             await context.SaveChangesAsync();
 
             await Clients.Others.SendAsync("User_Offline", userId);
@@ -36,7 +36,7 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            var user = await context.Users_SP.SingleOrDefaultAsync(p => p.Email == dto.Email);
+            var user = await context.Users_Ps.SingleOrDefaultAsync(p => p.Email == dto.Email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
@@ -56,7 +56,7 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            var person = await context.Users_SP.SingleOrDefaultAsync(u => u.Id == userId);
+            var person = await context.Users_Ps.SingleOrDefaultAsync(u => u.Id == userId);
 
             if (person == null)
             {
@@ -76,20 +76,20 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            if (context.Users_SP.Any(u => u.Email == dto.Email))
+            if (context.Users_Ps.Any(u => u.Email == dto.Email))
             {
                 await Clients.Caller.SendAsync("Registration_Fail", Context.ConnectionId);
             }
 
-            var newUser = new User_SP
+            var newUser = new User_Ps
             {
                 Email = dto.Email,
                 Name = dto.Name,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                Role = (sbyte)(!context.Users_SP.Any() ? 1 : 0) // first user becomes admin (Role = 1), others are customers (Role = 0)
+                Role = (sbyte)(!context.Users_Ps.Any() ? 1 : 0) // first user becomes admin (Role = 1), others are customers (Role = 0)
             };
 
-            context.Users_SP.Add(newUser);
+            context.Users_Ps.Add(newUser);
             context.SaveChanges();
 
             await Login(newUser, "Registration_ResponseSuccess");
@@ -101,17 +101,17 @@ public partial class ConnectionHub : Hub
         }
     }
 
-    private async Task Login(User_SP user, string successMethod)
+    private async Task Login(User_Ps user, string successMethod)
     {
         try
         {
-            var connection = await context.Connections
+            var connection = await context.Connections_Ps
             .FirstOrDefaultAsync(conn => conn.UserId == user.Id)
-            ?? new Connection(user.Id, Context.ConnectionId);
+            ?? new Connection_Ps(user.Id, Context.ConnectionId);
 
             if (connection.Id == default) // Check if it's a new connection
             {
-                await context.Connections.AddAsync(connection);
+                await context.Connections_Ps.AddAsync(connection);
                 await context.SaveChangesAsync();
                 await Clients.Others.SendAsync("User_Online", new UserSignalrDto(user.Id, user.Name, connection.SignalrId));
             }
@@ -130,8 +130,8 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            var connection = await context.Connections.Where(c => c.UserId == userId).ToArrayAsync();
-            context.Connections.RemoveRange(connection);
+            var connection = await context.Connections_Ps.Where(c => c.UserId == userId).ToArrayAsync();
+            context.Connections_Ps.RemoveRange(connection);
             await context.SaveChangesAsync();
 
             await Clients.Caller.SendAsync("Logout_Response");
@@ -146,7 +146,7 @@ public partial class ConnectionHub : Hub
 
     private async Task<Guid> GetUserId()
     {
-        return await context.Connections.Where(c => c.SignalrId == Context.ConnectionId).Select(c => c.UserId).SingleOrDefaultAsync();
+        return await context.Connections_Ps.Where(c => c.SignalrId == Context.ConnectionId).Select(c => c.UserId).SingleOrDefaultAsync();
     }
 }
 

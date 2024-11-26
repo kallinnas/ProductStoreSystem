@@ -3,11 +3,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, catchError, map, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { UserRegistrDto } from '../models/user.model';
-import { SignalrService } from './signalr.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+
+@Injectable({ providedIn: 'root' })
 export class ApiAuthService {
 
   private baseUrl: string = `${environment.baseURL}/Auth`;
@@ -15,15 +13,9 @@ export class ApiAuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
   isAuthenticatedSubject$ = this.isAuthenticatedSubject.asObservable();
 
-  constructor(
-    private http: HttpClient,
-    private signalrService: SignalrService,
-  ) { }
+  constructor(private http: HttpClient) { }
 
   login(email: string, password: string): Observable<any> {
-    //Temp solution to let work signalr logout because logout-api doesnt exist auth.service.53
-    this.signalrService.userData.id = email; this.signalrService.userData.name = password;
-
     return this.http.post(`${this.baseUrl}/login`, { email, password });
   }
 
@@ -37,20 +29,18 @@ export class ApiAuthService {
         map((isValid) => {
           this.isAuthenticatedSubject.next(isValid);
         }),
+
         catchError(() => {
           this.isAuthenticatedSubject.next(false);
           return of(false);
-        })
-      ).subscribe();
+        }))
+      .subscribe();
   }
 
   checkAuthentication(): void {
     const token = localStorage.getItem('token');
-    if (token) {
-      this.validateToken(token);
-    } else {
-      this.isAuthenticatedSubject.next(false);
-    }
+    if (token) { this.validateToken(token); }
+    else { this.isAuthenticatedSubject.next(false); }
   }
 
   getToken(): string | null {

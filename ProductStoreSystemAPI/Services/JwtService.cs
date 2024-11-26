@@ -12,7 +12,7 @@ public class JwtService
     private readonly IHostEnvironment _env;
     public JwtService(IConfiguration configuration, IHostEnvironment env) { _configuration = configuration; _env = env; }
 
-    public string GenerateJwtToken(User_SP user)
+    public string GenerateJwtToken(User_Ps user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(GetJwtKey());

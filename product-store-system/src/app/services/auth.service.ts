@@ -49,9 +49,6 @@ export class AuthService {
 
   launchHub(token: string) {
     this.signalrService.startConnection(token).then(() => {
-      //Temp solution to let work signalr logout because logout-api doesnt exist api-auth.service.24
-      this.authentification(this.signalrService.userData.id, this.signalrService.userData.name);
-
       this.authentificationProcess();
       this.authentificationListenerSuccess();
       this.authentificationListenerFail();
@@ -69,7 +66,7 @@ export class AuthService {
 
     await this.signalrService.hubConnection.invoke('Authentification', userDto)
       .then(() => {
-        // alert("Loading is attempt...")
+        console.log('siganlr authentification');
       })
       .catch(err => console.log(err));
   }
@@ -78,15 +75,14 @@ export class AuthService {
     if (this.signalrService.hubConnection && this.signalrService.hubConnection.state === signalR.HubConnectionState.Connected) {
       // Ensure hub state connection before adding the listener
       this.signalrService.hubConnection.on('Authentification_ResponseSuccess', (user: UserSignalrDto) => {
+
         this.signalrService.userData = { ...user };
         localStorage.setItem('token', user.id.toString());
-
-        // alert('Logged-in successfully!');
         this.router.navigate(["/edit-products"]);
       });
-    } else {
-      console.error('Hub connection is not in a connected state.');
     }
+
+    else { console.error('Hub connection is not in a connected state.'); }
   }
 
   async reAuthentification() {

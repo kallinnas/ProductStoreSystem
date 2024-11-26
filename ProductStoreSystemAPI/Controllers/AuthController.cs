@@ -5,7 +5,7 @@ using ProductStoreSystemAPI.Services.Interfaces;
 
 namespace ProductStoreSystemAPI.Controllers;
 
-public class TokenRequest { public string Token { get; set; } }
+public class TokenRequest { public string? Token { get; set; } }
 
 [Route("api/[controller]")]
 [ApiController]
@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
     [HttpPost("validateToken")]
     public async Task<IActionResult> ValidateToken([FromBody] TokenRequest request)
     {
-        bool isValid = await _authService.ValidateTokenAsync(request.Token);
+        bool isValid = await _authService.ValidateTokenAsync(request.Token!);
         return Ok(isValid);
     }
 
