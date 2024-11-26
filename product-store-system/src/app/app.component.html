@@ -1,7 +1,7 @@
 <div fxFlexFill fxLayout="column">
 
     <div *ngIf="isAuthorized" fxFlex="80px" fxLayoutAlign="space-around center">
-        <div *ngIf="apiAuthService.getUserRole() == '1'" fxFlex fxLayoutAlign="space-evenly center">
+        <div fxFlex fxLayoutAlign="space-evenly center">
             <a routerLink="/display-products" class="router-link">Display</a>
             <a routerLink="/edit-products" class="router-link">Edit</a>
             <a routerLink="/display-connection-status" class="router-link">User Status Connections</a>

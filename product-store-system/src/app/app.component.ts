@@ -37,6 +37,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.apiAuthService.isAuthenticatedSubject$.subscribe(valid => {
           this.isAuthorized = valid;
           if (valid) {
+            this.authService.router.navigate(["/edit-products"]);
             const token = localStorage.getItem('token');
             // && this.signalrService.hubConnection.state === signalR.HubConnectionState.Connected
             if (!this.signalrService.hubConnection) {

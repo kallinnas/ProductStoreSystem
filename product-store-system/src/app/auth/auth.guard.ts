@@ -25,17 +25,18 @@ export class AuthGuard implements CanActivate {
         this.router.navigate(['auth']);
         return false;
       }
-
-      if (route.routeConfig?.path === 'display-connection-status' || route.routeConfig?.path === 'edit-products') {
-        if (userRole === '1') { // admin
-          return true;
-        } 
+      
+      return true;
+      // if (route.routeConfig?.path === 'display-connection-status' || route.routeConfig?.path === 'edit-products') {
+      //   if (userRole === '1') { // admin
+      //     return true;
+      //   } 
         
-        else {
-          this.router.navigate(['display-products']);
-          return false;
-        }
-      }
+      //   else {
+      //     this.router.navigate(['display-products']);
+      //     return false;
+      //   }
+      // }
     } 
     
     else {
