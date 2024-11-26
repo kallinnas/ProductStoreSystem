@@ -105,15 +105,19 @@ public partial class ConnectionHub : Hub
     {
         try
         {
-            var signalrId = Context.ConnectionId;
+            var connection = await context.Connections
+            .FirstOrDefaultAsync(conn => conn.UserId == user.Id)
+            ?? new Connection(user.Id, Context.ConnectionId);
 
-            var connection = new Connection(user.Id, signalrId);
-            await context.Connections.AddAsync(connection);
-            await context.SaveChangesAsync();
+            if (connection.Id == default) // Check if it's a new connection
+            {
+                await context.Connections.AddAsync(connection);
+                await context.SaveChangesAsync();
+                await Clients.Others.SendAsync("User_Online", new UserSignalrDto(user.Id, user.Name, connection.SignalrId));
+            }
 
-            var userDto = new UserSignalrDto(user.Id, user.Name, signalrId);
+            var userDto = new UserSignalrDto(user.Id, user.Name, connection.SignalrId);
             await Clients.Caller.SendAsync(successMethod, userDto);
-            await Clients.Others.SendAsync("User_Online", userDto);
         }
 
         catch (Exception ex)

@@ -8,7 +8,7 @@ import * as signalR from '@microsoft/signalr';
 export class SignalrService {
 
   hubConnection!: signalR.HubConnection;
-  userData!: UserSignalrDto;
+  userData: UserSignalrDto = new UserSignalrDto();
 
   private signalrSubject = new Subject<any>();
   signalrSubject$ = this.signalrSubject.asObservable();

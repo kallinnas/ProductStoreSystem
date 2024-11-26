@@ -49,6 +49,9 @@ export class AuthService {
 
   launchHub(token: string) {
     this.signalrService.startConnection(token).then(() => {
+      //Temp solution to let work signalr logout because logout-api doesnt exist api-auth.service.24
+      this.authentification(this.signalrService.userData.id, this.signalrService.userData.name);
+
       this.authentificationProcess();
       this.authentificationListenerSuccess();
       this.authentificationListenerFail();

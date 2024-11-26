@@ -27,9 +27,7 @@ public static class JwtServiceExtensions
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = jwtSettings["Issuer"],
                 ValidAudience = jwtSettings["Audience"],
-                //IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(GetJwtKey())),
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(GetJwtKey(services))),
-                //IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!)),
                 ClockSkew = TimeSpan.Zero 
             };
 

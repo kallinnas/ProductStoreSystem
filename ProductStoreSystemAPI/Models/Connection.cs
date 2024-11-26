@@ -14,16 +14,3 @@ public class Connection
     public DateTime? TimeStamp { get; set; }
     public virtual User_SP User { get; set; } = null!;
 }
-
-//public class ConnectionDbDto
-//{
-//    public Guid Id { get; set; }
-//    public string SignalrId { get; set; } = null!;
-//    public DateTime? TimeStamp { get; set; }
-//    public ConnectionDbDto(Guid userId, string signalrId)
-//    {
-//        Id = userId;
-//        SignalrId = signalrId;
-//        TimeStamp = DateTime.UtcNow;
-//    }
-//}
